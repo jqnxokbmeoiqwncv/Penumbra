@@ -19,7 +19,13 @@ public readonly struct ImcModGroupEditDrawer(ModGroupEditDrawer editor, ImcModGr
         var entry        = group.DefaultEntry;
         var changes      = false;
 
-        ImUtf8.TextFramed(identifier.ToString(), 0, editor.AvailableWidth, borderColor: ImGui.GetColorU32(ImGuiCol.Border));
+        var width = editor.AvailableWidth.X - ImUtf8.ItemInnerSpacing.X - ImUtf8.CalcTextSize("All Variants"u8).X;
+        ImUtf8.TextFramed(identifier.ToString(), 0, new Vector2(width, 0), borderColor: ImGui.GetColorU32(ImGuiCol.Border));
+        ImUtf8.SameLineInner();
+        var allVariants = group.AllVariants;
+        if (ImUtf8.Checkbox("All Variants"u8, ref allVariants))
+            editor.ModManager.OptionEditor.ImcEditor.ChangeAllVariants(group, allVariants);
+        ImUtf8.HoverTooltip("Make this group overwrite all corresponding variants for this identifier, not just the one specified."u8);
 
         using (ImUtf8.Group())
         {
@@ -118,7 +124,7 @@ public readonly struct ImcModGroupEditDrawer(ModGroupEditDrawer editor, ImcModGr
             : validName
                 ? "Add a new option to this group."u8
                 : "Please enter a name for the new option."u8;
-        if (ImUtf8.IconButton(FontAwesomeIcon.Plus, tt, !validName || dis))
+        if (ImUtf8.IconButton(FontAwesomeIcon.Plus, tt, default, !validName || dis))
         {
             editor.ModManager.OptionEditor.ImcEditor.AddOption(group, cache, name);
             editor.NewOptionName = null;
