@@ -453,7 +453,7 @@ public partial class ModEditWindow
 
     private static class EstRow
     {
-        private static EstManipulation _new = new(Gender.Male, ModelRace.Midlander, EstManipulation.EstType.Body, 1, 0);
+        private static EstManipulation _new = new(Gender.Male, ModelRace.Midlander, EstType.Body, 1, EstEntry.Zero);
 
         private static float IdWidth
             => 100 * UiHelpers.Scale;
@@ -510,7 +510,7 @@ public partial class ModEditWindow
             // Values
             using var disabled = ImRaii.Disabled();
             ImGui.TableNextColumn();
-            IntDragInput("##estSkeleton", "Skeleton Index", IdWidth, _new.Entry, defaultEntry, out _, 0, ushort.MaxValue, 0.05f);
+            IntDragInput("##estSkeleton", "Skeleton Index", IdWidth, _new.Entry.Value, defaultEntry.Value, out _, 0, ushort.MaxValue, 0.05f);
         }
 
         public static void Draw(MetaFileManager metaFileManager, EstManipulation meta, ModEditor editor, Vector2 iconSize)
@@ -538,9 +538,9 @@ public partial class ModEditWindow
             // Values
             var defaultEntry = EstFile.GetDefault(metaFileManager, meta.Slot, Names.CombinedRace(meta.Gender, meta.Race), meta.SetId);
             ImGui.TableNextColumn();
-            if (IntDragInput("##estSkeleton", $"Skeleton Index\nDefault Value: {defaultEntry}", IdWidth,         meta.Entry, defaultEntry,
+            if (IntDragInput("##estSkeleton", $"Skeleton Index\nDefault Value: {defaultEntry}", IdWidth,         meta.Entry.Value, defaultEntry.Value,
                     out var entry,            0,                                                ushort.MaxValue, 0.05f))
-                editor.MetaEditor.Change(meta.Copy((ushort)entry));
+                editor.MetaEditor.Change(meta.Copy(new EstEntry((ushort)entry)));
         }
     }
 
@@ -640,13 +640,13 @@ public partial class ModEditWindow
             ImGui.SameLine();
             if (IntDragInput("##gmpUnkB",  $"Animation Type B?\nDefault Value: {defaultEntry.UnknownB}", UnkWidth, meta.Entry.UnknownB,
                     defaultEntry.UnknownB, out var unkB,                                                 0,        15, 0.01f))
-                editor.MetaEditor.Change(meta.Copy(meta.Entry with { UnknownA = (byte)unkB }));
+                editor.MetaEditor.Change(meta.Copy(meta.Entry with { UnknownB = (byte)unkB }));
         }
     }
 
     private static class RspRow
     {
-        private static RspManipulation _new = new(SubRace.Midlander, RspAttribute.MaleMinSize, 1f);
+        private static RspManipulation _new = new(SubRace.Midlander, RspAttribute.MaleMinSize, RspEntry.One);
 
         private static float FloatWidth
             => 150 * UiHelpers.Scale;
@@ -680,7 +680,8 @@ public partial class ModEditWindow
             using var disabled = ImRaii.Disabled();
             ImGui.TableNextColumn();
             ImGui.SetNextItemWidth(FloatWidth);
-            ImGui.DragFloat("##rspValue", ref defaultEntry, 0f);
+            var value = defaultEntry.Value;
+            ImGui.DragFloat("##rspValue", ref value, 0f);
         }
 
         public static void Draw(MetaFileManager metaFileManager, RspManipulation meta, ModEditor editor, Vector2 iconSize)
@@ -699,15 +700,15 @@ public partial class ModEditWindow
             ImGui.TableNextColumn();
 
             // Values
-            var def   = CmpFile.GetDefault(metaFileManager, meta.SubRace, meta.Attribute);
-            var value = meta.Entry;
+            var def   = CmpFile.GetDefault(metaFileManager, meta.SubRace, meta.Attribute).Value;
+            var value = meta.Entry.Value;
             ImGui.SetNextItemWidth(FloatWidth);
             using var color = ImRaii.PushColor(ImGuiCol.FrameBg,
                 def < value ? ColorId.IncreasedMetaValue.Value() : ColorId.DecreasedMetaValue.Value(),
                 def != value);
-            if (ImGui.DragFloat("##rspValue", ref value, 0.001f, RspManipulation.MinValue, RspManipulation.MaxValue)
-             && value is >= RspManipulation.MinValue and <= RspManipulation.MaxValue)
-                editor.MetaEditor.Change(meta.Copy(value));
+            if (ImGui.DragFloat("##rspValue", ref value, 0.001f, RspEntry.MinValue, RspEntry.MaxValue)
+             && value is >= RspEntry.MinValue and <= RspEntry.MaxValue)
+                editor.MetaEditor.Change(meta.Copy(new RspEntry(value)));
 
             ImGuiUtil.HoverTooltip($"Default Value: {def:0.###}");
         }
@@ -758,6 +759,7 @@ public partial class ModEditWindow
 
             if (IdInput("##geqpCond", 100 * ImUtf8.GlobalScale, _new.Condition.Id, out var newId, 1, ushort.MaxValue, _new.Condition.Id <= 1))
                 _new = _new with { Condition = newId };
+            ImUtf8.HoverTooltip("The Model ID for the item that should not be hidden."u8);
         }
 
         public static void Draw(MetaFileManager metaFileManager, GlobalEqpManipulation meta, ModEditor editor, Vector2 iconSize)
