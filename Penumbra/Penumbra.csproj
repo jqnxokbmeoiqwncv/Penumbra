@@ -7,8 +7,8 @@
         <Company>absolute gangstas</Company>
         <Product>Penumbra</Product>
         <Copyright>Copyright © 2022</Copyright>
-        <FileVersion>9.0.0.1</FileVersion>
-        <AssemblyVersion>9.0.0.1</AssemblyVersion>
+        <FileVersion>1.3.0.4</FileVersion>
+        <AssemblyVersion>1.3.0.4</AssemblyVersion>
         <OutputPath>bin\$(Configuration)\</OutputPath>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Nullable>enable</Nullable>
@@ -87,6 +87,7 @@
 
     <ItemGroup>
         <!-- This reference is only there to silence a vulnerability warning caused by transitive inclusion of a lower version through PeNet and System.Security.Cryptography.Pkcs. -->
+        <PackageReference Include="DalamudPackager" Version="2.1.13" />
         <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
         <PackageReference Include="EmbedIO" Version="3.5.2" />
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
